@@ -42,14 +42,21 @@ const Play = ({ resetGame }) => {
 
         const wordInArray = randomWord.trim().toUpperCase().split("");
         setWordToGuess(wordInArray);
-        setOnlyGoodLetterGuessed(
-            wordInArray.map(() => {
-                return {
-                    letter: ".",
-                    status: status.wrong,
-                };
-            })
-        );
+
+        // set first letter in good guess
+        const goodLettersArray = wordInArray.map(() => {
+            return {
+                letter: ".",
+                status: status.wrong,
+            };
+        });
+
+        goodLettersArray[0] = {
+            letter: wordInArray[0],
+            status: status.good,
+        };
+
+        setOnlyGoodLetterGuessed(goodLettersArray);
 
         // count each letter in the word (ex: 2 'e', 1 'd' etc..)
         const count = {};
@@ -96,10 +103,6 @@ const Play = ({ resetGame }) => {
     const playRound = (e) => {
         e.preventDefault();
 
-        console.log(
-            "🚀 ~ file: Play.jsx:39 ~ playRound ~ wordToGuess:",
-            wordToGuess
-        );
         const result = wordToGuess.map((el) => {
             return undefined;
         });
@@ -155,18 +158,21 @@ const Play = ({ resetGame }) => {
         }
 
         // add this new letter count state as a user guess in the list
-        console.log("🚀 ~ file: Play.jsx:99 ~ playRound ~ result:", result);
         const newArray = [...userGuess, result];
         setUserGuess(newArray);
         setGuessValue("");
 
-        // show only goog placed for next try
-        const onlyGoodArray = result.map((letter) => {
+        // show only good placed for next try
+        const onlyGoodArray = result.map((letter, index) => {
             if (letter.status !== status.good) {
-                return {
-                    letter: ".",
-                    status: status.wrong,
-                };
+                if (onlyGoodLetterGuessed[index].status === status.good) {
+                    return onlyGoodLetterGuessed[index];
+                } else {
+                    return {
+                        letter: ".",
+                        status: status.wrong,
+                    };
+                }
             } else {
                 return letter;
             }
@@ -309,6 +315,7 @@ const Play = ({ resetGame }) => {
                                 value={guessValue}
                                 minLength={wordToGuess.length}
                                 maxLength={wordToGuess.length}
+                                required
                             />
                             <Button>Proposer ce mot</Button>
                         </form>

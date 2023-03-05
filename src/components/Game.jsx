@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useRecoilState } from "recoil";
 import { isTeamATurnState } from "../atoms/game/isTeamATurnState";
 import { isWinState } from "../atoms/game/isWinState";
@@ -44,13 +44,6 @@ const Game = () => {
         setIsWin(false);
         setIsTeamATurn((prev) => !prev);
     };
-
-    useEffect(() => {
-        console.log(
-            "🚀 ~ file: Game.jsx:52 ~ Game ~ isTeamATurn:",
-            isTeamATurn
-        );
-    }, [isTeamATurn]);
 
     if (!isReady) {
         return <Home setIsReady={setIsReady} />;
