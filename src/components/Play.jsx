@@ -31,7 +31,8 @@ const Play = ({ resetGame }) => {
     );
 
     const [guessValue, setGuessValue] = useState("");
-    const [rulesTabOpen, setRulesTabOpen] = useState("");
+    const [rulesTabOpen, setRulesTabOpen] = useState(false);
+    const [confirmEndGameOpen, setConfirmEndGameOpen] = useState(false);
 
     const generateNewWordToGuess = useCallback(async () => {
         const randomWord = await getRandomWord();
@@ -67,9 +68,12 @@ const Play = ({ resetGame }) => {
                 count[letter] = 1;
             }
         }
+
+        // deduct the first letter that is given to the remaining count of letters to guess
+        count[wordInArray[0]] -= 1;
         setWordToGuessLetterCount(count);
 
-        // set first value
+        // set current user guess line to dots for every letter to guess
         const userGuessArray = wordInArray.map(() => {
             return {
                 letter: ".",
@@ -136,8 +140,7 @@ const Play = ({ resetGame }) => {
             let newStatus = status.wrong;
 
             const isLetterCountFull =
-                count[guessArray[i]] >=
-                setWordToGuessLetterCount[guessArray[i]];
+                count[guessArray[i]] >= wordToGuessLetterCount[guessArray[i]];
 
             if (wordToGuess.includes(guessArray[i]) && !isLetterCountFull) {
                 newStatus = status.misplaced;
@@ -200,7 +203,12 @@ const Play = ({ resetGame }) => {
         setRound((prev) => prev + 1);
     };
 
-    // TODO ajouter un bouton reset tout le jeu (avec resetAlsoTeams true) avec popup de confirmation
+    const handleEndGame = () => {
+        resetGame(true);
+    };
+
+    // si round === 8 message d'échec, passage à l'autre équipe. Reset userguess mais tjrs afficher le onlyGoodLetters
+    // si aucune des deux équipes ne trouve, reset le game nouveau mot
 
     return (
         <div className="w-full bg-gradient-to-b from-orange-200 to-orange-400">
@@ -218,6 +226,38 @@ const Play = ({ resetGame }) => {
                             : "Voir les règles 💡"}
                     </div>
                     {rulesTabOpen && <Rules />}
+
+                    {confirmEndGameOpen ? (
+                        <div className="mb-6 bg-white p-4 rounded-md">
+                            <p>Etes-vous sûr de vouloir terminer la partie ?</p>
+                            <p>
+                                Les équipes vont êtres supprimées et les scores
+                                remis à 0.
+                            </p>
+                            <div className="mt-4 flex gap-3 justify-center">
+                                <Button
+                                    onClick={() => setConfirmEndGameOpen(false)}
+                                >
+                                    Annuler
+                                </Button>
+                                <Button
+                                    level={"primary"}
+                                    onClick={handleEndGame}
+                                >
+                                    Confirmer
+                                </Button>
+                            </div>
+                        </div>
+                    ) : (
+                        <p
+                            className="cursor-pointer mb-4"
+                            onClick={() =>
+                                setConfirmEndGameOpen((prev) => !prev)
+                            }
+                        >
+                            Terminer la partie
+                        </p>
+                    )}
                     <div className="grid grid-cols-2 w-full bg-gray-300 text-gray-500 rounded-md mb-6">
                         <div
                             className={`rounded-md p-4 ${
