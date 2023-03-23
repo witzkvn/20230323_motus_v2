@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useRecoilState } from "recoil";
 import { userGuessState } from "../atoms/userGuesses/userGuessState";
 import { onlyGoodLetterGuessedState } from "../atoms/userGuesses/onlyGoodLetterGuessedState";
@@ -34,6 +34,8 @@ const Play = ({ resetGame }) => {
     const [rulesTabOpen, setRulesTabOpen] = useState(false);
     const [confirmEndGameOpen, setConfirmEndGameOpen] = useState(false);
     const [tryNumber, setTryNumber] = useState(1);
+
+    const wordInput = useRef();
 
     const generateNewWordToGuess = useCallback(async () => {
         const randomWord = await getRandomWord();
@@ -99,6 +101,7 @@ const Play = ({ resetGame }) => {
         setWordToGuessLetterCount,
     ]);
 
+    // if reset of game, call function to generate new word to guess
     useEffect(() => {
         async function getNewWord() {
             if (wordToGuess.length === 0) {
@@ -108,6 +111,7 @@ const Play = ({ resetGame }) => {
         getNewWord();
     }, [generateNewWordToGuess, wordToGuess.length]);
 
+    // check user word proposition and process good / misplaced / wrong letters
     const playRound = (e) => {
         e.preventDefault();
 
@@ -222,6 +226,9 @@ const Play = ({ resetGame }) => {
 
             setTryNumber((prev) => prev + 1);
         }
+
+        // set word input in focus for better user experience
+        wordInput.current.focus();
     };
 
     const handleEndGame = () => {
@@ -372,6 +379,7 @@ const Play = ({ resetGame }) => {
                         >
                             <input
                                 className="uppercase p-2 rounded-sm mb-2 block text-black"
+                                ref={wordInput}
                                 type="text"
                                 onChange={(e) => setGuessValue(e.target.value)}
                                 value={guessValue}
