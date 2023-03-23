@@ -34,6 +34,7 @@ const Play = ({ resetGame }) => {
     const [rulesTabOpen, setRulesTabOpen] = useState(false);
     const [confirmEndGameOpen, setConfirmEndGameOpen] = useState(false);
     const [tryNumber, setTryNumber] = useState(1);
+    const [isEndGame, setIsEndGame] = useState(false);
 
     const wordInput = useRef();
 
@@ -94,6 +95,7 @@ const Play = ({ resetGame }) => {
 
         // set number of try to the first try
         setTryNumber(1);
+        setIsEndGame(false);
     }, [
         setOnlyGoodLetterGuessed,
         setUserGuess,
@@ -215,14 +217,14 @@ const Play = ({ resetGame }) => {
             // if it's 3rd try (meaning team A and team B tried), reset game for new word
             // try state set at the end, we verify if value is actually 2
             if (tryNumber === 2) {
-                resetGame(false);
+                setIsEndGame(true); // show the word to guess and button to reset game
             } else {
                 setIsTeamATurn((prev) => !prev);
                 setRound(0);
-
-                // delete all previous user guesses and keep actual good letters guessed
-                setUserGuess([[...onlyGoodLetterGuessed]]);
             }
+
+            // delete all previous user guesses and keep actual good letters guessed
+            setUserGuess([[...onlyGoodLetterGuessed]]);
 
             setTryNumber((prev) => prev + 1);
         }
@@ -316,6 +318,20 @@ const Play = ({ resetGame }) => {
                     <div className="mb-2 font-bold bg-gray-300 w-full p-2 rounded-md">
                         Tour {round + 1}/8
                     </div>
+                    {isEndGame && (
+                        <div className="py-4">
+                            <p className="mb-4">
+                                Le mot à trouver était{" "}
+                                <span className="text-bold">{wordToGuess}</span>
+                            </p>
+                            <Button
+                                level="primary"
+                                onClick={() => resetGame(false)}
+                            >
+                                Manche suivante
+                            </Button>
+                        </div>
+                    )}
                     <div className="mb-6">
                         {userGuess ? (
                             userGuess.map((guess, index) => {
