@@ -208,18 +208,19 @@ const Play = ({ resetGame }) => {
 
         // if the current team failed 8 consecutives rounds, it's the othe team turn to try for 8 rounds
         if (round === 7) {
-            setIsTeamATurn((prev) => !prev);
-            setRound(0);
+            // if it's 3rd try (meaning team A and team B tried), reset game for new word
+            // try state set at the end, we verify if value is actually 2
+            if (tryNumber === 2) {
+                resetGame(false);
+            } else {
+                setIsTeamATurn((prev) => !prev);
+                setRound(0);
 
-            // delete all previous user guesses and keep actual good letters guessed
-            setUserGuess([[...onlyGoodLetterGuessed]]);
+                // delete all previous user guesses and keep actual good letters guessed
+                setUserGuess([[...onlyGoodLetterGuessed]]);
+            }
 
             setTryNumber((prev) => prev + 1);
-
-            // if it's 3rd try (meaning team A and team B tried), reset game for new word
-            if (tryNumber === 3) {
-                resetGame(false);
-            }
         }
     };
 
