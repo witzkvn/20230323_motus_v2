@@ -33,6 +33,7 @@ const Play = ({ resetGame }) => {
     const [guessValue, setGuessValue] = useState("");
     const [rulesTabOpen, setRulesTabOpen] = useState(false);
     const [confirmEndGameOpen, setConfirmEndGameOpen] = useState(false);
+    const [tryNumber, setTryNumber] = useState(1);
 
     const generateNewWordToGuess = useCallback(async () => {
         const randomWord = await getRandomWord();
@@ -88,6 +89,9 @@ const Play = ({ resetGame }) => {
         };
 
         setUserGuess([userGuessArray]);
+
+        // set number of try to the first try
+        setTryNumber(1);
     }, [
         setOnlyGoodLetterGuessed,
         setUserGuess,
@@ -201,18 +205,31 @@ const Play = ({ resetGame }) => {
         }
 
         setRound((prev) => prev + 1);
+
+        // if the current team failed 8 consecutives rounds, it's the othe team turn to try for 8 rounds
+        if (round === 7) {
+            setIsTeamATurn((prev) => !prev);
+            setRound(0);
+
+            // delete all previous user guesses and keep actual good letters guessed
+            setUserGuess([[...onlyGoodLetterGuessed]]);
+
+            setTryNumber((prev) => prev + 1);
+
+            // if it's 3rd try (meaning team A and team B tried), reset game for new word
+            if (tryNumber === 3) {
+                resetGame(false);
+            }
+        }
     };
 
     const handleEndGame = () => {
         resetGame(true);
     };
 
-    // si round === 8 message d'échec, passage à l'autre équipe. Reset userguess mais tjrs afficher le onlyGoodLetters
-    // si aucune des deux équipes ne trouve, reset le game nouveau mot
-
     return (
         <div className="w-full bg-gradient-to-b from-orange-200 to-orange-400">
-            <div className="max-w-max mx-auto">
+            <div className="mx-auto px-4 md:w-[38rem]">
                 <div className="App min-h-screen flex items-center flex-col text-center py-6 px-2">
                     <h1 className="text-4xl mb-4 font-bold">
                         Devinez le mot !
@@ -292,25 +309,29 @@ const Play = ({ resetGame }) => {
                         Tour {round + 1}/8
                     </div>
                     <div className="mb-6">
-                        {userGuess.map((guess, index) => {
-                            if (round > 0 && index === 0) {
-                                return null;
-                            } else {
-                                return (
-                                    <div
-                                        key={`guess-${index}`}
-                                        className="flex mb-1"
-                                    >
-                                        {guess.map((letter, index) => (
-                                            <Letter
-                                                key={`letter-${round}-${index}`}
-                                                letter={letter}
-                                            />
-                                        ))}
-                                    </div>
-                                );
-                            }
-                        })}
+                        {userGuess ? (
+                            userGuess.map((guess, index) => {
+                                if (round > 0 && index === 0) {
+                                    return null;
+                                } else {
+                                    return (
+                                        <div
+                                            key={`guess-${index}`}
+                                            className="flex mb-1"
+                                        >
+                                            {guess.map((letter, index) => (
+                                                <Letter
+                                                    key={`letter-${round}-${index}`}
+                                                    letter={letter}
+                                                />
+                                            ))}
+                                        </div>
+                                    );
+                                }
+                            })
+                        ) : (
+                            <p className="my-2 text-center">Chargement...</p>
+                        )}
                         {round !== 0 && onlyGoodLetterGuessed && (
                             <div className="flex mb-1">
                                 {onlyGoodLetterGuessed.map((letter, index) => (
