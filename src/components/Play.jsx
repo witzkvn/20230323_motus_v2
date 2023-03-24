@@ -357,6 +357,9 @@ const Play = ({ resetGame }) => {
             </div>
           ) : (
             <form onSubmit={playRound} className="flex flex-col w-full mx-auto">
+              <p className="text-center mb-1">
+                Mot en {wordToGuess.length} lettres
+              </p>
               <input
                 className="uppercase p-2 rounded-sm mb-2 block text-black tracking-widest"
                 ref={wordInput}
