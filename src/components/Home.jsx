@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useRecoilState } from "recoil";
 import { teamADataState, teamBDataState } from "../atoms/teams/teamsDataState";
-import Button from "./Button";
 
 const Home = ({ setIsReady }) => {
     const [teamAData, setTeamAData] = useRecoilState(teamADataState);
@@ -73,7 +72,7 @@ const Home = ({ setIsReady }) => {
                             required
                         />
                     </div>
-                    <Button>Lancer le jeu</Button>
+                    <button className="btn btn-primary">Lancer le jeu</button>
                 </form>
                 {isSameNameError && (
                     <p className="text-red-400 font-bold mt-4">

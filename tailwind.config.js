@@ -1,7 +1,9 @@
 module.exports = {
-    content: ["./src/**/*.{js,jsx,ts,tsx}"],
-    theme: {
-        extend: {},
+  content: ["./src/**/*.{js,jsx,ts,tsx}"],
+  theme: {
+    fontFamily: {
+      pacifico: ["Pacifico", "cursive"],
     },
-    plugins: [],
+  },
+  plugins: [require("daisyui")],
 };

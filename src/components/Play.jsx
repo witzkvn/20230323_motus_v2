@@ -12,8 +12,10 @@ import { teamADataState, teamBDataState } from "../atoms/teams/teamsDataState";
 import { roundState } from "../atoms/game/roundState";
 import Rules from "./Rules";
 import Letter from "./Letter";
-import Button from "./Button";
 import getRandomWord from "../utils/getRandomWord";
+import Modal from "./Modal";
+
+const endgameModalId = "engame-modal";
 
 const Play = ({ resetGame }) => {
   const [wordToGuess, setWordToGuess] = useRecoilState(wordToGuessState);
@@ -232,13 +234,14 @@ const Play = ({ resetGame }) => {
 
   const handleEndGame = () => {
     resetGame(true);
+    setConfirmEndGameOpen(false);
   };
 
   return (
-    <div className="w-full bg-gradient-to-b from-orange-200 to-orange-400">
+    <div className="w-full bg-image text-black">
       <div className="mx-auto px-4 md:w-[38rem]">
         <div className="App min-h-screen flex items-center flex-col text-center py-6 px-2">
-          <h1 className="text-4xl mb-4 font-bold">Devinez le mot !</h1>
+          <h1 className="text-4xl mb-4 font-bold font-pacifico ">Momotus</h1>
           <div
             onClick={() => setRulesTabOpen((prev) => !prev)}
             className="cursor-pointer mb-4"
@@ -247,8 +250,8 @@ const Play = ({ resetGame }) => {
           </div>
           {rulesTabOpen && <Rules />}
 
-          {confirmEndGameOpen ? (
-            <div className="mb-6 bg-white p-4 rounded-md">
+          {/* {
+                        <div className="mb-6 bg-white p-4 rounded-md">
               <p>Etes-vous sûr de vouloir terminer la partie ?</p>
               <p>Les équipes vont êtres supprimées et les scores remis à 0.</p>
               <div className="mt-4 flex gap-3 justify-center">
@@ -260,14 +263,32 @@ const Play = ({ resetGame }) => {
                 </Button>
               </div>
             </div>
-          ) : (
-            <p
+
+                        <p
               className="cursor-pointer mb-4"
               onClick={() => setConfirmEndGameOpen((prev) => !prev)}
             >
               Terminer la partie
             </p>
-          )}
+          } */}
+
+          <Modal
+            title={"Etes-vous sûr de vouloir terminer la partie ?"}
+            text="Les équipes vont êtres supprimées et les scores remis à 0."
+            btnSecondaryText="Annuler"
+            btnSecondaryAction={() => setConfirmEndGameOpen(false)}
+            btnPrimaryText={"Confirmer"}
+            btnPrimaryAction={handleEndGame}
+            modalId={endgameModalId}
+          />
+
+          <label
+            htmlFor={endgameModalId}
+            className="btn"
+            onClick={() => setConfirmEndGameOpen(true)}
+          >
+            Terminer la partie
+          </label>
           <div className="grid grid-cols-2 w-full bg-gray-300 text-gray-500 rounded-md mb-6">
             <div
               className={`rounded-md p-4 ${
@@ -302,9 +323,9 @@ const Play = ({ resetGame }) => {
                 Le mot à trouver était{" "}
                 <span className="text-bold">{wordToGuess}</span>
               </p>
-              <Button level="primary" onClick={() => resetGame(false)}>
+              <button className="btn btn-primary" onClick={() => resetGame(false)}>
                 Manche suivante
-              </Button>
+              </button>
             </div>
           )}
           <div className="mb-6">
@@ -353,7 +374,7 @@ const Play = ({ resetGame }) => {
                 </span>
                 .
               </p>
-              <Button onClick={() => resetGame(false)}>Tour Suivant</Button>
+              <button className="btn btn-primary" onClick={() => resetGame(false)}>Tour Suivant</button>
             </div>
           ) : (
             <form onSubmit={playRound} className="flex flex-col w-full mx-auto">
@@ -361,7 +382,7 @@ const Play = ({ resetGame }) => {
                 Mot en {wordToGuess.length} lettres
               </p>
               <input
-                className="uppercase p-2 rounded-sm mb-2 block text-black tracking-widest"
+                className="uppercase input"
                 ref={wordInput}
                 type="text"
                 onChange={(e) => setGuessValue(e.target.value)}
@@ -374,7 +395,7 @@ const Play = ({ resetGame }) => {
                 spellcheck="false"
                 required
               />
-              <Button>Proposer ce mot</Button>
+              <button className="btn btn-primary">Proposer ce mot</button>
             </form>
           )}
         </div>
