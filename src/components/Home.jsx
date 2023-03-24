@@ -24,7 +24,7 @@ const Home = ({ setIsReady }) => {
 
     return (
         <div className=" bg-gradient-to-b from-cyan-600 to-blue-600">
-            <div className="w-[28rem] h-screen mx-auto text-white flex items-center flex-col text-center py-6 px-2">
+            <div className="w-full sm:w-[28rem] h-screen mx-auto text-white flex items-center flex-col text-center py-6 px-2">
                 <h1 className="mb-6 text-2xl font-bold uppercase md:text-3xl">
                     Jouez à{" "}
                     <span className="font-bold text-orange-400">Motus</span> !
