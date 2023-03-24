@@ -358,13 +358,17 @@ const Play = ({ resetGame }) => {
           ) : (
             <form onSubmit={playRound} className="flex flex-col w-full mx-auto">
               <input
-                className="uppercase p-2 rounded-sm mb-2 block text-black"
+                className="uppercase p-2 rounded-sm mb-2 block text-black tracking-widest"
                 ref={wordInput}
                 type="text"
                 onChange={(e) => setGuessValue(e.target.value)}
                 value={guessValue}
                 minLength={wordToGuess.length}
                 maxLength={wordToGuess.length}
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="off"
+                spellcheck="false"
                 required
               />
               <Button>Proposer ce mot</Button>
