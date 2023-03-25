@@ -331,9 +331,9 @@ const Play = ({ resetGame }) => {
       </Modal>
 
       <div className="w-full bg-image text-black">
-        <div className="mx-auto px-4 md:w-[38rem]">
+        <div className="mx-auto px-1 sm:w-[38rem]">
           <div className="App min-h-screen flex items-center flex-col text-center py-6 px-2">
-            <h1 className="text-4xl mb-4 font-bold font-pacifico ">Momotus</h1>
+            <h1 className="text-4xl mb-4 font-bold font-pacifico">Momotus</h1>
 
             <div className="mx-auto grid grid-cols-2 justify-end gap-3 p-3 mb-4 rounded-md">
               <label
@@ -352,13 +352,13 @@ const Play = ({ resetGame }) => {
                 Terminer la partie
               </label>
             </div>
-            <div className="grid grid-cols-2 w-full rounded-md">
+            <div className="grid grid-cols-1 sm:grid-cols-2 w-full rounded-md">
               <PlayTeamWrapper team={teamAData} isTeamA={isTeamATurn} />
               <PlayTeamWrapper team={teamBData} isTeamA={!isTeamATurn} />
             </div>
 
             <div className="card w-full items-center bg-base-100 my-8">
-              <div className="card-body">
+              <div className="card-body px-3 py-6">
                 {userGuess ? (
                   userGuess.map((guess, index) => {
                     if (round > 0 && index === 0) {
@@ -379,7 +379,7 @@ const Play = ({ resetGame }) => {
                 ) : (
                   <p className="my-2 text-center">Chargement...</p>
                 )}
-                {round !== 0 && onlyGoodLetterGuessed && (
+                {round !== 0 && onlyGoodLetterGuessed && !isWin && (
                   <div className="flex mb-1">
                     {onlyGoodLetterGuessed.map((letter, index) => (
                       <Letter
@@ -393,7 +393,7 @@ const Play = ({ resetGame }) => {
             </div>
 
             <form onSubmit={playRound} className="flex flex-col w-full mx-auto">
-              <div className="font-bold bg-base-300 w-full p-2 flex justify-between rounded-md">
+              <div className="font-bold bg-base-300 w-full px-3 py-2 flex justify-between rounded-md">
                 <p>Tour {round + 1}/8</p>
                 <p>Mot en {wordToGuess.length} lettres</p>
               </div>
