@@ -10,12 +10,16 @@ import { isWinState } from "../atoms/game/isWinState";
 import { isTeamATurnState } from "../atoms/game/isTeamATurnState";
 import { teamADataState, teamBDataState } from "../atoms/teams/teamsDataState";
 import { roundState } from "../atoms/game/roundState";
-import Rules from "./Rules";
 import Letter from "./Letter";
 import getRandomWord from "../utils/getRandomWord";
 import Modal from "./Modal";
+import PlayTeamWrapper from "./PlayTeamWrapper";
 
 const endgameModalId = "engame-modal";
+const rulesModalId = "rules-modal";
+const winModalId = "win-modal";
+const lostModalId = "lost-modal";
+const changeTurnModalId = "change-turn-modal";
 
 const Play = ({ resetGame }) => {
   const [wordToGuess, setWordToGuess] = useRecoilState(wordToGuessState);
@@ -37,6 +41,7 @@ const Play = ({ resetGame }) => {
   const [confirmEndGameOpen, setConfirmEndGameOpen] = useState(false);
   const [tryNumber, setTryNumber] = useState(1);
   const [isEndGame, setIsEndGame] = useState(false);
+  const [isChangingTeam, setIsChangingTeam] = useState(false);
 
   const wordInput = useRef();
 
@@ -219,6 +224,7 @@ const Play = ({ resetGame }) => {
         setIsEndGame(true); // show the word to guess and button to reset game
       } else {
         setIsTeamATurn((prev) => !prev);
+        setIsChangingTeam(true);
         setRound(0);
       }
 
@@ -238,169 +244,180 @@ const Play = ({ resetGame }) => {
   };
 
   return (
-    <div className="w-full bg-image text-black">
-      <div className="mx-auto px-4 md:w-[38rem]">
-        <div className="App min-h-screen flex items-center flex-col text-center py-6 px-2">
-          <h1 className="text-4xl mb-4 font-bold font-pacifico ">Momotus</h1>
-          <div
-            onClick={() => setRulesTabOpen((prev) => !prev)}
-            className="cursor-pointer mb-4"
-          >
-            {rulesTabOpen ? "Cacher les règles ❌" : "Voir les règles 💡"}
-          </div>
-          {rulesTabOpen && <Rules />}
-
-          {/* {
-                        <div className="mb-6 bg-white p-4 rounded-md">
-              <p>Etes-vous sûr de vouloir terminer la partie ?</p>
-              <p>Les équipes vont êtres supprimées et les scores remis à 0.</p>
-              <div className="mt-4 flex gap-3 justify-center">
-                <Button onClick={() => setConfirmEndGameOpen(false)}>
-                  Annuler
-                </Button>
-                <Button level={"primary"} onClick={handleEndGame}>
-                  Confirmer
-                </Button>
-              </div>
-            </div>
-
-                        <p
-              className="cursor-pointer mb-4"
-              onClick={() => setConfirmEndGameOpen((prev) => !prev)}
-            >
-              Terminer la partie
-            </p>
-          } */}
-
-          <Modal
-            title={"Etes-vous sûr de vouloir terminer la partie ?"}
-            text="Les équipes vont êtres supprimées et les scores remis à 0."
-            btnSecondaryText="Annuler"
-            btnSecondaryAction={() => setConfirmEndGameOpen(false)}
-            btnPrimaryText={"Confirmer"}
-            btnPrimaryAction={handleEndGame}
-            modalId={endgameModalId}
+    <>
+      <Modal
+        title={"Les règles"}
+        btnPrimaryText={"OK"}
+        btnPrimaryAction={() => setRulesTabOpen(false)}
+        modalId={rulesModalId}
+      >
+        <p className="mb-2">
+          Vous devez trouver un mot aléatoire en 8 tours maximum ! Bonne chance
+          😉
+        </p>
+        <p className="font-bold text-2xl mb-2">Légende :</p>
+        <div className="flex items-center mb-1">
+          <Letter
+            customSizesClasses={"h-4 w-4"}
+            letter={{ letter: "", status: status.good }}
           />
+          <p>Lettre bien placée</p>
+        </div>
+        <div className="flex items-center mb-1">
+          <Letter
+            customSizesClasses={"h-4 w-4"}
+            letter={{ letter: "", status: status.misplaced }}
+          />
+          <p>Lettre présente mais mal placée</p>
+        </div>
+        <div className="flex items-center">
+          <Letter
+            customSizesClasses={"h-4 w-4"}
+            letter={{ letter: "", status: status.wrong }}
+          />
+          <p>Mauvaise lettre</p>
+        </div>
+      </Modal>
 
-          <label
-            htmlFor={endgameModalId}
-            className="btn"
-            onClick={() => setConfirmEndGameOpen(true)}
-          >
-            Terminer la partie
-          </label>
-          <div className="grid grid-cols-2 w-full bg-gray-300 text-gray-500 rounded-md mb-6">
-            <div
-              className={`rounded-md p-4 ${
-                isTeamATurn && "border-4 border-blue-500 bg-blue-400 text-white"
-              }`}
-            >
-              <div className="font-bold whitespace-nowrap">
-                Score {teamAData.name}
+      <Modal
+        title={"Etes-vous sûr de vouloir terminer la partie ?"}
+        text="Les équipes vont êtres supprimées et les scores remis à 0."
+        btnSecondaryText="Annuler"
+        btnSecondaryAction={() => setConfirmEndGameOpen(false)}
+        btnPrimaryText={"Confirmer"}
+        btnPrimaryAction={handleEndGame}
+        modalId={endgameModalId}
+      />
+
+      <Modal
+        title={"A l'autre équipe de jouer !"}
+        text="Vous n'avez pas trouvé le mot en 8 tours. La main passe à l'autre équipe."
+        btnPrimaryText={"OK"}
+        btnPrimaryAction={() => setIsChangingTeam(false)}
+        modalId={changeTurnModalId}
+        isOpen={isChangingTeam}
+      />
+
+      <Modal
+        title={"🎉 Vous avez trouvé le mot ! 🎉"}
+        btnPrimaryText={"Tour Suivant"}
+        btnPrimaryAction={() => resetGame(false)}
+        modalId={winModalId}
+        isOpen={isWin}
+      >
+        <p>
+          Il s'agissait bien de{" "}
+          <span className="font-bold text-2xl">{wordToGuess.join("")}</span>,
+          trouvé en{" "}
+          <span className="font-bold text-green-700">
+            {round + 1} tour
+            {round > 1 ? "s" : ""}
+          </span>
+          .
+        </p>
+      </Modal>
+
+      <Modal
+        title={"C'est perdu..."}
+        btnPrimaryText={"Mot suivant"}
+        btnPrimaryAction={() => resetGame(false)}
+        modalId={lostModalId}
+        isOpen={isEndGame}
+      >
+        <p>
+          Le mot à trouver était{" "}
+          <span className="text-bold">{wordToGuess}</span>
+        </p>
+      </Modal>
+
+      <div className="w-full bg-image text-black">
+        <div className="mx-auto px-4 md:w-[38rem]">
+          <div className="App min-h-screen flex items-center flex-col text-center py-6 px-2">
+            <h1 className="text-4xl mb-4 font-bold font-pacifico ">Momotus</h1>
+
+            <div className="mx-auto grid grid-cols-2 justify-end gap-3 p-3 mb-4 rounded-md">
+              <label
+                htmlFor={rulesModalId}
+                className="btn btn-xs btn-outline"
+                onClick={() => setRulesTabOpen(true)}
+              >
+                Voir les règles
+              </label>
+
+              <label
+                htmlFor={endgameModalId}
+                className="btn btn-xs btn-outline"
+                onClick={() => setConfirmEndGameOpen(true)}
+              >
+                Terminer la partie
+              </label>
+            </div>
+            <div className="grid grid-cols-2 w-full rounded-md">
+              <PlayTeamWrapper team={teamAData} isTeamA={isTeamATurn} />
+              <PlayTeamWrapper team={teamBData} isTeamA={!isTeamATurn} />
+            </div>
+
+            <div className="card w-full items-center bg-base-100 my-8">
+              <div className="card-body">
+                {userGuess ? (
+                  userGuess.map((guess, index) => {
+                    if (round > 0 && index === 0) {
+                      return null;
+                    } else {
+                      return (
+                        <div key={`guess-${index}`} className="flex mb-1">
+                          {guess.map((letter, index) => (
+                            <Letter
+                              key={`letter-${round}-${index}`}
+                              letter={letter}
+                            />
+                          ))}
+                        </div>
+                      );
+                    }
+                  })
+                ) : (
+                  <p className="my-2 text-center">Chargement...</p>
+                )}
+                {round !== 0 && onlyGoodLetterGuessed && (
+                  <div className="flex mb-1">
+                    {onlyGoodLetterGuessed.map((letter, index) => (
+                      <Letter
+                        key={`letter-${round}-${index}`}
+                        letter={letter}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
-              <div className="text-xl">{teamAData.score}</div>
-              {isTeamATurn && <p className="font-bold mt-2">A toi !</p>}
             </div>
-            <div
-              className={`rounded-md p-4 ${
-                !isTeamATurn &&
-                "border-4 border-blue-500 bg-blue-400 text-white"
-              }`}
-            >
-              <div className="font-bold whitespace-nowrap mt-auto">
-                Score {teamBData.name}
-              </div>
-              <div className="text-xl">{teamBData.score}</div>
-              {!isTeamATurn && <p className="font-bold mt-2">A toi !</p>}
-            </div>
-          </div>
-          <div className="mb-2 font-bold bg-gray-300 w-full p-2 rounded-md">
-            Tour {round + 1}/8
-          </div>
-          {isEndGame && (
-            <div className="py-4">
-              <p className="mb-4">
-                Le mot à trouver était{" "}
-                <span className="text-bold">{wordToGuess}</span>
-              </p>
-              <button className="btn btn-primary" onClick={() => resetGame(false)}>
-                Manche suivante
-              </button>
-            </div>
-          )}
-          <div className="mb-6">
-            {userGuess ? (
-              userGuess.map((guess, index) => {
-                if (round > 0 && index === 0) {
-                  return null;
-                } else {
-                  return (
-                    <div key={`guess-${index}`} className="flex mb-1">
-                      {guess.map((letter, index) => (
-                        <Letter
-                          key={`letter-${round}-${index}`}
-                          letter={letter}
-                        />
-                      ))}
-                    </div>
-                  );
-                }
-              })
-            ) : (
-              <p className="my-2 text-center">Chargement...</p>
-            )}
-            {round !== 0 && onlyGoodLetterGuessed && (
-              <div className="flex mb-1">
-                {onlyGoodLetterGuessed.map((letter, index) => (
-                  <Letter key={`letter-${round}-${index}`} letter={letter} />
-                ))}
-              </div>
-            )}
-          </div>
-          {isWin ? (
-            <div>
-              <h2 className="text-2xl mb-4 font-bold">
-                🎉 Vous avez trouvé le mot ! 🎉
-              </h2>
-              <p className="mb-6">
-                Il s'agissait bien de{" "}
-                <span className="font-bold text-2xl">
-                  {wordToGuess.join("")}
-                </span>
-                , trouvé en{" "}
-                <span className="font-bold text-green-700">
-                  {round + 1} tour
-                  {round > 1 ? "s" : ""}
-                </span>
-                .
-              </p>
-              <button className="btn btn-primary" onClick={() => resetGame(false)}>Tour Suivant</button>
-            </div>
-          ) : (
+
             <form onSubmit={playRound} className="flex flex-col w-full mx-auto">
-              <p className="text-center mb-1">
-                Mot en {wordToGuess.length} lettres
-              </p>
+              <div className="font-bold bg-base-300 w-full p-2 flex justify-between rounded-md">
+                <p>Tour {round + 1}/8</p>
+                <p>Mot en {wordToGuess.length} lettres</p>
+              </div>
+
               <input
-                className="uppercase input"
+                className="uppercase input mb-3"
                 ref={wordInput}
                 type="text"
                 onChange={(e) => setGuessValue(e.target.value)}
                 value={guessValue}
                 minLength={wordToGuess.length}
                 maxLength={wordToGuess.length}
-                autocomplete="off"
-                autocorrect="off"
-                autocapitalize="off"
-                spellcheck="false"
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck="false"
                 required
               />
-              <button className="btn btn-primary">Proposer ce mot</button>
+              <button className="btn btn-secondary">Proposer ce mot</button>
             </form>
-          )}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
